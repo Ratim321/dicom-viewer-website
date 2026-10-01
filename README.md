@@ -43,11 +43,13 @@ Serves `dist/` + `/gate` on `PORT` (default 8787).
    - **Variables and Secrets** → add `GATE_PASSWORD` (Secret)
    - **Bindings** → **KV namespace** → Variable name `GATE_KV` → create/select a namespace
 5. Redeploy so the binding applies.
-6. Put this URL in DicomViewer (`license/remote_gate_url`):
+After deploy, put this URL in DicomViewer (`license/remote_gate_url`):
 
 ```text
-https://YOUR-PROJECT.pages.dev/gate
+https://dicom-viewer-website.pages.dev/gate
 ```
+
+(Live site: https://dicom-viewer-website.pages.dev/)
 
 ### CLI deploy (optional)
 
