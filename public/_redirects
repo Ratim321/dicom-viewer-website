@@ -1,0 +1,5 @@
+/index.html
+  !/assets/*
+  !/favicon.svg
+  !/gate
+  /:splat  /index.html  200

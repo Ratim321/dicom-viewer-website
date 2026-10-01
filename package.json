@@ -1,12 +1,27 @@
 {
   "name": "dicom-viewer-website",
-  "version": "1.0.0",
   "private": true,
-  "description": "DicomViewer marketing site + remote yes/no license gate",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "dev": "concurrently \"node server.mjs\" \"vite\"",
+    "dev:web": "vite",
+    "dev:api": "node server.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
     "start": "node server.mjs",
-    "dev": "node server.mjs"
+    "pages:dev": "npm run build && wrangler pages dev dist --kv=GATE_KV --binding GATE_PASSWORD=DicomGate2026"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.0",
+    "concurrently": "^9.1.2",
+    "vite": "^6.3.5",
+    "wrangler": "^4.14.0"
   },
   "engines": {
     "node": ">=18"

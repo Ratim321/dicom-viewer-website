@@ -1,0 +1,10 @@
+# Cloudflare Pages — React Vite build output
+name = "dicom-viewer-website"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "dist"
+
+# Set GATE_PASSWORD in Cloudflare dashboard (Settings → Variables and Secrets).
+# Create a KV namespace, then fill id below OR bind GATE_KV in the dashboard.
+# [[kv_namespaces]]
+# binding = "GATE_KV"
+# id = "YOUR_KV_NAMESPACE_ID"

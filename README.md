@@ -1,50 +1,67 @@
-# DicomViewer Website
+# DicomViewer Website (React + Vite)
 
-Single-page product site + remote **yes / no** license gate for the desktop DicomViewer app.
+Product landing page + remote **yes / no** license gate for the desktop app.
 
-## Pages
+## Routes
 
 | URL | Purpose |
 |-----|---------|
-| `/` | Features landing page |
-| `/control.html` | Admin UI to set gate to `yes` or `no` |
-| `/gate` | **Plain-text** endpoint the desktop app should call (`yes` or `no`) |
+| `/` | Features (React) |
+| `/control` | Set gate to yes / no |
+| `/gate` | Plain-text `yes` or `no` for DicomViewer |
 
-## Run locally
+## Local development
 
 ```bash
+npm install
+npm run dev
+```
+
+- UI: http://localhost:5173  
+- API (`/gate`): http://localhost:8787 (Vite proxies `/gate`)
+
+Default password: `DicomGate2026`
+
+## Production (Node)
+
+```bash
+npm run build
 npm start
 ```
 
-Open:
+Serves `dist/` + `/gate` on `PORT` (default 8787).
 
-- http://localhost:8787/
-- http://localhost:8787/control.html
-- http://localhost:8787/gate
+## Deploy to Cloudflare Pages
 
-Default admin password: `DicomGate2026`  
-Override with env var `GATE_PASSWORD`.
-
-## Deploy
-
-Any Node host works (Render, Railway, Fly.io, VPS):
-
-1. Set start command: `npm start`
-2. Set env `GATE_PASSWORD` to a strong secret
-3. Optional: set `PORT` (platform usually injects it)
-
-After deploy, put this URL into DicomViewer settings key `license/remote_gate_url`:
+1. Push this repo to GitHub (already: `Ratim321/dicom-viewer-website`).
+2. Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** → connect the repo.
+3. Build settings:
+   - **Build command:** `npm run build`
+   - **Build output directory:** `dist`
+   - **Root directory:** `/` (repo root)
+4. After first deploy, open the project → **Settings**:
+   - **Variables and Secrets** → add `GATE_PASSWORD` (Secret)
+   - **Bindings** → **KV namespace** → Variable name `GATE_KV` → create/select a namespace
+5. Redeploy so the binding applies.
+6. Put this URL in DicomViewer (`license/remote_gate_url`):
 
 ```text
-https://YOUR-DOMAIN/gate
+https://YOUR-PROJECT.pages.dev/gate
 ```
+
+### CLI deploy (optional)
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name=dicom-viewer-website
+```
+
+Create KV: `npx wrangler kv namespace create GATE_KV` then bind `GATE_KV` in the dashboard (or uncomment in `wrangler.toml`).
 
 ## Desktop app behavior
 
-- Gate returns `yes` → app opens without license prompt  
-- Gate returns `no` → app requires license key (`Paidbsh@`)  
-- Gate unreachable → falls back to local 14-day / paid license logic  
+- `yes` → open without license prompt  
+- `no` → require license key  
+- unreachable → local 14-day / paid logic  
 
-## Security note
-
-Change `GATE_PASSWORD` before production. The `/gate` GET endpoint is public on purpose so the viewer can read it; only POST (set value) is password-protected.
+Change `GATE_PASSWORD` before production.

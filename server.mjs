@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC = path.join(__dirname, "public");
+const DIST = path.join(__dirname, "dist");
 const DATA_DIR = path.join(__dirname, "data");
 const GATE_FILE = path.join(DATA_DIR, "gate.txt");
 const PORT = Number(process.env.PORT || 8787);
@@ -22,7 +22,7 @@ function readGate() {
 
 function writeGate(value) {
   ensureGateFile();
-  const v = value.trim().toLowerCase();
+  const v = String(value).trim().toLowerCase();
   if (v !== "yes" && v !== "no") throw new Error("value must be yes or no");
   fs.writeFileSync(GATE_FILE, v + "\n", "utf8");
   return v;
@@ -40,16 +40,15 @@ function contentType(filePath) {
       ".ico": "image/x-icon",
       ".txt": "text/plain; charset=utf-8",
       ".json": "application/json; charset=utf-8",
+      ".map": "application/json; charset=utf-8",
     }[ext] || "application/octet-stream"
   );
 }
 
 function send(res, status, body, headers = {}) {
-  const payload = typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body);
-  res.writeHead(status, {
-    "Cache-Control": "no-store",
-    ...headers,
-  });
+  const payload =
+    typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body);
+  res.writeHead(status, { "Cache-Control": "no-store", ...headers });
   res.end(payload);
 }
 
@@ -72,7 +71,6 @@ function safeJoin(root, urlPath) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
-  // CORS for local testing from other origins if needed
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -89,7 +87,7 @@ const server = http.createServer(async (req, res) => {
         if (data.password !== PASSWORD) {
           return send(res, 401, { error: "Wrong password" }, { "Content-Type": "application/json" });
         }
-        const value = writeGate(String(data.value || ""));
+        const value = writeGate(data.value);
         return send(res, 200, { ok: true, value }, { "Content-Type": "application/json" });
       } catch (e) {
         return send(
@@ -103,22 +101,30 @@ const server = http.createServer(async (req, res) => {
     return send(res, 405, "Method not allowed\n", { "Content-Type": "text/plain" });
   }
 
-  let filePath = safeJoin(PUBLIC, url.pathname === "/" ? "/index.html" : url.pathname);
+  // Production: serve Vite build + SPA fallback
+  if (!fs.existsSync(DIST)) {
+    return send(
+      res,
+      503,
+      "Run npm run build first (or use npm run dev for Vite + this API).\n",
+      { "Content-Type": "text/plain" },
+    );
+  }
+
+  let filePath = safeJoin(DIST, url.pathname === "/" ? "/index.html" : url.pathname);
   if (!filePath) return send(res, 403, "Forbidden");
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, "index.html");
   }
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
-    return send(res, 404, "Not found\n", { "Content-Type": "text/plain" });
+    filePath = path.join(DIST, "index.html");
   }
   return send(res, 200, fs.readFileSync(filePath), { "Content-Type": contentType(filePath) });
 });
 
 ensureGateFile();
 server.listen(PORT, () => {
-  console.log(`DicomViewer website listening on http://localhost:${PORT}`);
-  console.log(`Features:  http://localhost:${PORT}/`);
-  console.log(`Control:   http://localhost:${PORT}/control.html`);
-  console.log(`Gate GET:  http://localhost:${PORT}/gate   (now: ${readGate()})`);
-  console.log(`Password:  GATE_PASSWORD env (default DicomGate2026)`);
+  console.log(`API / production server on http://localhost:${PORT}`);
+  console.log(`Gate: http://localhost:${PORT}/gate  (now: ${readGate()})`);
+  console.log(`Dev UI: npm run dev  →  http://localhost:5173 (proxies /gate here)`);
 });
