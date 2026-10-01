@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>License gate — DicomViewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="control-page">
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">DicomViewer</span>
+    </a>
+    <nav>
+      <a href="/">Features</a>
+      <a href="/control.html" class="nav-admin active">License gate</a>
+    </nav>
+  </header>
+
+  <main class="control-main">
+    <section class="control-card">
+      <h1>License gate</h1>
+      <p class="lede tight">
+        DicomViewer reads this value on open. Set <strong>yes</strong> to allow
+        without a key, or <strong>no</strong> to require a license.
+      </p>
+
+      <div class="status-row">
+        <span class="label">Current value</span>
+        <span id="current" class="pill unknown">…</span>
+      </div>
+
+      <label class="field">
+        <span>Admin password</span>
+        <input id="password" type="password" autocomplete="current-password" placeholder="GATE_PASSWORD" />
+      </label>
+
+      <div class="cta-row">
+        <button type="button" class="btn primary" id="btn-yes">Set YES</button>
+        <button type="button" class="btn danger" id="btn-no">Set NO</button>
+        <button type="button" class="btn ghost" id="btn-refresh">Refresh</button>
+      </div>
+
+      <p id="msg" class="msg" role="status"></p>
+
+      <div class="endpoint-box">
+        <span class="label">URL for the desktop app</span>
+        <code id="gate-url"></code>
+        <p class="tiny">Response body is plain text: <code>yes</code> or <code>no</code></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="control.js"></script>
+</body>
+</html>

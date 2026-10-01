@@ -1,0 +1,14 @@
+{
+  "name": "dicom-viewer-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DicomViewer marketing site + remote yes/no license gate",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
